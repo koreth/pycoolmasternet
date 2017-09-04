@@ -112,6 +112,12 @@ class CoolMasterNetDevice(object):
         self._make_request('off {}')
         self._clear_status()
 
+    def update_status(self):
+        """Forces a status update. Normally, status is queried automatically
+        if it hasn't been updated in the past second."""
+        self._clear_status()
+        self._update_status()
+
     @property
     def fan_speed(self):
         self._update_status()
