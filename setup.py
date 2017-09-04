@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name = 'pycoolmasternet',
-    version = '0.0.1',
+    version = '0.0.2',
     license = 'MIT',
     description = 'Lightweight Python API for CoolMasterNet HVAC bridges',
     long_description = long_description,
