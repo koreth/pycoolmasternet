@@ -17,7 +17,9 @@ class CoolMasterNet(object):
 
     def _make_request(self, request):
         """Send a request to the CoolMasterNet and returns the response."""
-        with Telnet(self._host, self._port) as tn:
+        # Can't use "with" because Python 2 telnetlib doesn't support it
+        tn = Telnet(self._host, self._port)
+        try:
             if tn.read_until(b">", self._read_timeout) != b">":
                 raise Exception('CoolMasterNet prompt not found')
             
@@ -34,6 +36,8 @@ class CoolMasterNet(object):
                 response = response[:-4]
 
             return response
+        finally:
+            tn.close()
 
     def devices(self):
         """Return a list of CoolMasterNetDevice objects representing the
