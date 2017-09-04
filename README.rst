@@ -50,7 +50,11 @@ Usage
     device.set_mode('cool')
 
     # Dict with all the properties listed above
-    device.state
+    device.status
+
+    # Force refresh of status (by default, device auto-updates its status
+    # if most recent update is more than 1 second ago)
+    device.update_status()
 
 License
 -------
