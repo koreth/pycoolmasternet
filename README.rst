@@ -1,7 +1,8 @@
 pycoolmasternet
 ===============
-A Python 3 library for interacting with a
-[CoolMasterNet](https://coolautomation.com/products/coolmasternet/) HVAC bridge.
+A Python 3 library for interacting with a CoolMasterNet_ HVAC bridge.
+
+.. _CoolMasterNet: https://coolautomation.com/products/coolmasternet/
 
 Installation
 ------------
@@ -11,11 +12,13 @@ Or you can get the code from `https://github.com/koreth/pycoolmasternet`
 
 Usage
 -----
-::
-    import pycoolmasternet
+
+.. code-block:: python
+
+    from pycoolmasternet import CoolMasterNet
 
     # Supply the IP address and optional port number (default 10102).
-    cool = coolmasternet.CoolMasterNet('192.168.0.123', port=12345)
+    cool = CoolMasterNet('192.168.0.123', port=12345)
 
     # Returns a list of CoolMasterDevice objects
     devices = cool.devices()
@@ -45,6 +48,9 @@ Usage
     # Mode of operation: auto, cool, dry, fan, heat
     device.mode
     device.set_mode('cool')
+
+    # Dict with all the properties listed above
+    device.state
 
 License
 -------
