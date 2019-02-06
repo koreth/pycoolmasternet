@@ -99,7 +99,7 @@ class CoolMasterNetDevice(object):
         self._clear_status()
 
     def set_thermostat(self, value):
-        self._make_request("temp {}")
+        self._make_request("temp {} " + value)
         self._clear_status()
 
     def turn_on(self):
