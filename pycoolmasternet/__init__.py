@@ -21,13 +21,13 @@ class CoolMasterNet(object):
         tn = Telnet(self._host, self._port)
         try:
             if tn.read_until(b">", self._read_timeout) != b">":
-                raise Exception('CoolMasterNet prompt not found')
-            
+                raise Exception("CoolMasterNet prompt not found")
+
             request = request + "\n"
-            tn.write(request.encode('ascii'))
+            tn.write(request.encode("ascii"))
 
             response = tn.read_until(b"\n>", self._read_timeout)
-            response = response.decode('ascii')
+            response = response.decode("ascii")
 
             if response.endswith("\n>"):
                 response = response[:-1]
@@ -64,16 +64,16 @@ class CoolMasterNetDevice(object):
         if time.time() - self._last_refresh_time < 1:
             return
 
-        status_line = self._bridge._make_request('ls2 ' + self._uid)
+        status_line = self._bridge._make_request("ls2 " + self._uid)
 
         # Status line looks like
         # L7.001 ON  073.0F 077.7F Low  Cool OK   - 0
         fields = re.split(r"\s+", status_line.strip())
         if len(fields) != 9:
-            raise Exception('Unexpected status line format: ' + str(fields))
+            raise Exception("Unexpected status line format: " + str(fields))
 
-        self._is_on = fields[1] == 'ON'
-        self._unit = 'imperial' if fields[2][-1] == 'F' else 'celsius'
+        self._is_on = fields[1] == "ON"
+        self._unit = "imperial" if fields[2][-1] == "F" else "celsius"
         self._thermostat = float(fields[2][:-1])
         self._temperature = float(fields[3][:-1])
         self._fan_speed = fields[4].lower()
@@ -91,25 +91,25 @@ class CoolMasterNetDevice(object):
         return self._bridge._make_request(format_str.format(self._uid))
 
     def set_fan_speed(self, value):
-        self._make_request('fspeed {} ' + value)
+        self._make_request("fspeed {} " + value)
         self._clear_status()
 
     def set_mode(self, value):
-        self._make_request(value + ' {}')
+        self._make_request(value + " {}")
         self._clear_status()
 
     def set_thermostat(self, value):
-        self._make_request('temp {}')
+        self._make_request("temp {}")
         self._clear_status()
 
     def turn_on(self):
         """Turns the device on."""
-        self._make_request('on {}')
+        self._make_request("on {}")
         self._clear_status()
 
     def turn_off(self):
         """Turns the device off."""
-        self._make_request('off {}')
+        self._make_request("off {}")
         self._clear_status()
 
     def update_status(self):
@@ -137,13 +137,13 @@ class CoolMasterNetDevice(object):
     def status(self):
         self._update_status()
         return {
-            'fan_speed': self._fan_speed,
-            'is_on': self._is_on,
-            'mode': self._mode,
-            'temperature': self._temperature,
-            'thermostat': self._thermostat,
-            'uid': self._uid,
-            'unit': self._unit
+            "fan_speed": self._fan_speed,
+            "is_on": self._is_on,
+            "mode": self._mode,
+            "temperature": self._temperature,
+            "thermostat": self._thermostat,
+            "uid": self._uid,
+            "unit": self._unit,
         }
 
     @property
