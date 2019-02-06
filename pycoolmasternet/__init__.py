@@ -8,6 +8,7 @@ __copyright__ = "Copyright 2019 Steven Grimm"
 
 
 _SWING_CHAR_TO_NAME = {
+    "-": None,
     "0": None,
     "a": "auto",
     "h": "horizontal",
@@ -29,13 +30,22 @@ _SWING_NAME_TO_CHAR = {
 }
 
 
+def autoupdate_property(func):
+    def update_and_get(*args):
+        args[0]._update_if_needed()
+        return func(*args)
+
+    return property(update_and_get)
+
+
 class CoolMasterNet(object):
-    def __init__(self, host, port=10102, read_timeout=1):
+    def __init__(self, host, port=10102, read_timeout=1, auto_update=True):
         """Initialize this CoolMasterNet instance to connect to a particular
         host at a particular port."""
         self._host = host
         self._port = port
         self._read_timeout = read_timeout
+        self._auto_update = auto_update
 
     def _make_request(self, request):
         """Send a request to the CoolMasterNet and returns the response."""
@@ -65,7 +75,10 @@ class CoolMasterNet(object):
         """Return a list of CoolMasterNetDevice objects representing the
         devices attached to the bridge."""
         status_lines = self._make_request("ls").strip().split("\r\n")
-        return [CoolMasterNetDevice(self, line[0:6]) for line in status_lines]
+        return [
+            CoolMasterNetDevice(self, line[0:6], self._auto_update)
+            for line in status_lines
+        ]
 
 
 class CoolMasterNetDevice(object):
@@ -75,17 +88,20 @@ class CoolMasterNetDevice(object):
     properties in rapid succession doesn't require repeated server
     requests."""
 
-    def __init__(self, bridge, uid):
-        """Initializes a new device given its unit identifier."""
+    def __init__(self, bridge, uid, auto_update=True):
+        """Initialize a new device given its unit identifier."""
         self._bridge = bridge
         self._uid = uid
         self._last_refresh_time = 0
+        self._auto_update = auto_update
+
+    def _update_if_needed(self):
+        """Check whether the existing status is too stale and update it if so."""
+        if self._auto_update and time.time() - self._last_refresh_time >= 1:
+            self._update_status()
 
     def _update_status(self):
-        """Fetches the device's current status from the bridge if needed."""
-        if time.time() - self._last_refresh_time < 1:
-            return
-
+        """Fetch the device's current status from the bridge."""
         status_line = self._bridge._make_request("ls2 " + self._uid)
 
         # Status line looks like
@@ -107,11 +123,12 @@ class CoolMasterNetDevice(object):
         self._last_refresh_time = time.time()
 
     def _clear_status(self):
-        """Forces the next property read to refresh the device status."""
+        """Force the next property read to refresh the device status if
+        autoupdate mode is active."""
         self._last_refresh_time = 0
 
     def _make_request(self, format_str):
-        """Makes a request to the bridge. Replaces {} in format_str with
+        """Make a request to the bridge. {} in format_str is replaced with
         device's unit ID."""
         return self._bridge._make_request(format_str.format(self._uid))
 
@@ -132,70 +149,62 @@ class CoolMasterNetDevice(object):
         self._clear_status()
 
     def turn_on(self):
-        """Turns the device on."""
+        """Turn the device on."""
         self._make_request("on {}")
         self._clear_status()
 
     def turn_off(self):
-        """Turns the device off."""
+        """Turn the device off."""
         self._make_request("off {}")
         self._clear_status()
 
     def update_status(self):
-        """Forces a status update. Normally, status is queried automatically
+        """Force a status update. Normally, status is queried automatically
         if it hasn't been updated in the past second."""
         self._clear_status()
         self._update_status()
 
-    @property
+    @autoupdate_property
     def fan_speed(self):
-        self._update_status()
         return self._fan_speed
 
-    @property
+    @autoupdate_property
     def is_on(self):
-        self._update_status()
         return self._is_on
 
-    @property
+    @autoupdate_property
     def mode(self):
-        self._update_status()
         return self._mode
 
-    @property
+    @autoupdate_property
     def status(self):
-        self._update_status()
         return {
             "fan_speed": self._fan_speed,
             "is_on": self._is_on,
             "mode": self._mode,
-            "swing": self._swing,
+            "swing": self._swing_mode,
             "temperature": self._temperature,
             "thermostat": self._thermostat,
             "uid": self._uid,
             "unit": self._unit,
         }
 
-    @property
+    @autoupdate_property
     def swing(self):
-        self._update_status()
         return self._swing_mode
 
-    @property
+    @autoupdate_property
     def temperature(self):
-        self._update_status()
         return self._temperature
 
-    @property
+    @autoupdate_property
     def thermostat(self):
-        self._update_status()
         return self._thermostat
 
     @property
     def uid(self):
         return self._uid
 
-    @property
+    @autoupdate_property
     def unit(self):
-        self._update_status()
         return self._unit

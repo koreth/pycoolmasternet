@@ -18,7 +18,12 @@ Usage
     from pycoolmasternet import CoolMasterNet
 
     # Supply the IP address and optional port number (default 10102).
-    cool = CoolMasterNet('192.168.0.123', port=12345)
+    #
+    # By default, properties will be refreshed by querying the device
+    # if last refresh was more than 1 second ago; pass auto_update=False
+    # to disable that behavior (in which case you will need to call
+    # update_status() explicitly).
+    cool = CoolMasterNet('192.168.0.123', port=12345, auto_update=False)
 
     # Returns a list of CoolMasterDevice objects
     devices = cool.devices()
