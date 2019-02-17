@@ -128,34 +128,34 @@ class CoolMasterNetDevice(object):
         self._last_refresh_time = 0
 
     def _make_request(self, format_str):
-        """Make a request to the bridge. {} in format_str is replaced with
+        """Make a request to the bridge. "UID" in format_str is replaced with
         device's unit ID."""
-        return self._bridge._make_request(format_str.format(self._uid))
+        return self._bridge._make_request(format_str.replace("UID", self._uid))
 
     def set_fan_speed(self, value):
-        self._make_request("fspeed {} " + value)
+        self._make_request("fspeed UID {}".format(value))
         self._clear_status()
 
     def set_mode(self, value):
-        self._make_request(value + " {}")
+        self._make_request(value + " UID")
         self._clear_status()
 
     def set_thermostat(self, value):
-        self._make_request("temp {} " + str(value))
+        self._make_request("temp UID {}".format(value))
         self._clear_status()
 
     def set_swing(self, value):
-        self._make_request("swing {} " + _SWING_NAME_TO_CHAR[value])
+        self._make_request("swing UID {}".format(_SWING_NAME_TO_CHAR[value]))
         self._clear_status()
 
     def turn_on(self):
         """Turn the device on."""
-        self._make_request("on {}")
+        self._make_request("on UID")
         self._clear_status()
 
     def turn_off(self):
         """Turn the device off."""
-        self._make_request("off {}")
+        self._make_request("off UID")
         self._clear_status()
 
     def update_status(self):
