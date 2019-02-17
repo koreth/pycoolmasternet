@@ -29,6 +29,9 @@ _SWING_NAME_TO_CHAR = {
     "stop": "x",
 }
 
+_FAN_SPEEDS = ["low", "med", "high"]
+_MODES = ["auto", "cool", "dry", "fan", "heat"]
+
 
 def autoupdate_property(func):
     def update_and_get(*args):
@@ -137,16 +140,28 @@ class CoolMasterNetDevice(object):
         self._clear_status()
 
     def set_mode(self, value):
-        self._make_request(value + " UID")
-        self._clear_status()
+        if value in _MODES:
+            self._make_request(value + " UID")
+            self._clear_status()
+        else:
+            raise ValueError(
+                "Unrecognized mode {}. Valid values: {}".format(value, " ".join(_MODES))
+            )
 
     def set_thermostat(self, value):
         self._make_request("temp UID {}".format(value))
         self._clear_status()
 
     def set_swing(self, value):
-        self._make_request("swing UID {}".format(_SWING_NAME_TO_CHAR[value]))
-        self._clear_status()
+        if value in _SWING_NAME_TO_CHAR:
+            self._make_request("swing UID {}".format(_SWING_NAME_TO_CHAR[value]))
+            self._clear_status()
+        else:
+            raise ValueError(
+                "Unrecognized swing mode {}. Valid values: {}".format(
+                    value, " ".join(_SWING_NAME_TO_CHAR.keys())
+                )
+            )
 
     def turn_on(self):
         """Turn the device on."""
