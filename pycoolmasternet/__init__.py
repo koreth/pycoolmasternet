@@ -4,7 +4,29 @@ from telnetlib import Telnet
 import time
 
 __author__ = "Steven Grimm"
-__copyright__ = "Copyright 2017 Steven Grimm"
+__copyright__ = "Copyright 2019 Steven Grimm"
+
+
+_SWING_CHAR_TO_NAME = {
+    "0": None,
+    "a": "auto",
+    "h": "horizontal",
+    "3": "30",
+    "4": "45",
+    "6": "60",
+    "v": "vertical",
+    "x": "stop",
+}
+
+_SWING_NAME_TO_CHAR = {
+    "auto": "a",
+    "horizontal": "h",
+    "30": "3",
+    "45": "4",
+    "60": "6",
+    "vertical": "v",
+    "stop": "x",
+}
 
 
 class CoolMasterNet(object):
@@ -79,6 +101,9 @@ class CoolMasterNetDevice(object):
         self._fan_speed = fields[4].lower()
         self._mode = fields[5].lower()
 
+        swing_line = self._bridge._make_request("query {} s".format(self._uid))
+        self._swing_mode = _SWING_CHAR_TO_NAME[swing_line.strip()]
+
         self._last_refresh_time = time.time()
 
     def _clear_status(self):
@@ -100,6 +125,10 @@ class CoolMasterNetDevice(object):
 
     def set_thermostat(self, value):
         self._make_request("temp {} " + str(value))
+        self._clear_status()
+
+    def set_swing(self, value):
+        self._make_request("swing {} " + _SWING_NAME_TO_CHAR[value])
         self._clear_status()
 
     def turn_on(self):
@@ -140,11 +169,17 @@ class CoolMasterNetDevice(object):
             "fan_speed": self._fan_speed,
             "is_on": self._is_on,
             "mode": self._mode,
+            "swing": self._swing,
             "temperature": self._temperature,
             "thermostat": self._thermostat,
             "uid": self._uid,
             "unit": self._unit,
         }
+
+    @property
+    def swing(self):
+        self._update_status()
+        return self._swing_mode
 
     @property
     def temperature(self):

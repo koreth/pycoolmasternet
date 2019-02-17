@@ -49,6 +49,12 @@ Usage
     device.mode
     device.set_mode('cool')
 
+    # Swing mode: horizontal, vertical, auto, 30, 45, 60, stop
+    # Numeric settings are degrees of louver tilt. On read, the property can
+    # be None if the bridge reports that the device doesn't support swing.
+    device.swing
+    device.set_swing('30')
+
     # Dict with all the properties listed above
     device.status
 
